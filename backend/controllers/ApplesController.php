@@ -8,9 +8,9 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
 /**
- * AppleController implements the CRUD actions for Apple model.
+ * ApplesController implements the CRUD actions for Apple model.
  */
-class AppleController extends Controller {
+class ApplesController extends Controller {
 
     /**
      * Lists all Apple models.
@@ -19,38 +19,38 @@ class AppleController extends Controller {
      */
     public function actionIndex()
     {
-        if (Apple::isTreeEmpty()) {
-            Apple::cultivate();
-        } 
-        Apple::checkReady();
-        Apple::checkIsBad();
-        Apple::checkSize();
+        Apple::fillTree();
 
         $onTree = Apple::find()
             ->where(['status' => Apple::STATUS_TREE])
             ->all();
         
         $onGround = Apple::find()
-            ->where(['status' => Apple::STATUS_GROUND])
+            ->where(['status' => [Apple::STATUS_GROUND, Apple::STATUS_BAD]])
             ->all();
+
+        $session = Yii::$app->session;
+        $start = $session->get("start") ?? time();
+        $now = $session->get("now") ?? $start;    
+        $diff = $now - $start;
+        $day = floor($diff / 60 * 60 * 24);
+        $hour = floor($diff / 60 * 60);
 
         return $this->render('index', [
             'onTree' => $onTree,
             'onGround' => $onGround,
+            'now' => $now,
+            'hour' => $hour,
+            'day' => $day,
         ]);
     }
 
     /**
-     * Displays a single Apple model.
-     * @param int $id ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
+     * Очищает таблицу и
      */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+    public function actionReload(){
+        Yii::$app->db->createCommand()->truncateTable(Apple::tableName())->execute();
+        return $this->redirect(['index']);
     }
 
     /**
@@ -76,26 +76,6 @@ class AppleController extends Controller {
     }
 
     /**
-     * Updates an existing Apple model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
      * Deletes an existing Apple model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id ID
@@ -104,9 +84,10 @@ class AppleController extends Controller {
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        $model = $this->findModel($id);
+        if ($model->setDeleted()) {
+            return $this->redirect(['index']);
+        }
     }
 
     /**
@@ -126,21 +107,37 @@ class AppleController extends Controller {
     }
 
     /**
-     * Выращивание яблок.
+     * Следующий временной шаг.
      * @return Response
      */
-    public function actionCultivate() {
-        Apple::cultivate();
+    public function nextTime() {
+        $session = Yii::$app->session;
+        $now = $session->get('now') ?? time(); 
+        $next = $now + Apple::HOURS_INCREMENT * 60 * 60;
+        $session->set('now', $next);
         return $this->redirect(['index']);
     }
-
+    
     /**
      * Следующий день.
      * @return Response
      */
     public function nextDay() {
-        $session = Yii::$app->session();
-        $session->day += 1;
+        $session = Yii::$app->session;
+        $now = $session->get('now') ?? time(); 
+        $tomorrow = strtotime('+' . Apple::DAY_INCREMENT . ' days', $now);
+        $session->set('now', $tomorrow);
         return $this->redirect(['index']);
+    }
+
+    /**
+     * Поедание яблока
+     * @param int $id ID
+     * @return \yii\web\Response
+     */
+    public function actionEat($id) {
+        $model = $this->findModel($id);
+        $model->eat();
+        return $this->renderPartial("_apple", ['model' => $model]);
     }
 }
