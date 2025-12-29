@@ -19,7 +19,20 @@ class ApplesController extends Controller {
      */
     public function actionIndex()
     {
-        Apple::fillTree();
+        $session = Yii::$app->session;
+        $start = $session->get("start") ?? time();
+        $now = $session->get("now") ?? $start;
+        $session->set("start", $start);
+        $session->set("now", $now);
+        $diff = $now - $start;
+        $day = floor($diff / 60 * 60 * 24);
+        $hour = floor($diff / 60 * 60);
+
+        if (Apple::isTreeEmpty()) {
+            Apple::fillTree();
+        } else {
+            Apple::checkOnTime($now);
+        }
 
         $onTree = Apple::find()
             ->where(['status' => Apple::STATUS_TREE])
@@ -28,13 +41,6 @@ class ApplesController extends Controller {
         $onGround = Apple::find()
             ->where(['status' => [Apple::STATUS_GROUND, Apple::STATUS_BAD]])
             ->all();
-
-        $session = Yii::$app->session;
-        $start = $session->get("start") ?? time();
-        $now = $session->get("now") ?? $start;    
-        $diff = $now - $start;
-        $day = floor($diff / 60 * 60 * 24);
-        $hour = floor($diff / 60 * 60);
 
         return $this->render('index', [
             'onTree' => $onTree,
@@ -46,10 +52,10 @@ class ApplesController extends Controller {
     }
 
     /**
-     * Очищает таблицу и
+     * Очищает таблицу.
      */
     public function actionReload(){
-        Yii::$app->db->createCommand()->truncateTable(Apple::tableName())->execute();
+        Apple::truncate();
         return $this->redirect(['index']);
     }
 
@@ -135,7 +141,8 @@ class ApplesController extends Controller {
      * @param int $id ID
      * @return \yii\web\Response
      */
-    public function actionEat($id) {
+    public function actionEat() {
+        $id = $this->request->post("id");
         $model = $this->findModel($id);
         $model->eat();
         return $this->renderPartial("_apple", ['model' => $model]);

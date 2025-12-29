@@ -103,25 +103,6 @@ a.desc:after {
     justify-content:space-between;
     padding:45px 10px 5px;
 }
-/* #tree {
-    display: grid;
-    grid-template-columns: repeat(5, 20%);
-    grid-template-rows: repeat(4, 25%);
-    align-items: center;
-    justify-items: center;
-    width:60%;
-    height:55%;
-}
-#ground {
-    display: grid;
-    grid-template-columns: repeat(10, 10%);
-    grid-template-rows: repeat(2, 50%);
-    align-items: center;
-    justify-items: center;
-    grid-template-rows: repeat(4, 45px);
-    width:90%;
-    height:15%;
-} */
 #workarea > div {
     display:flex;
     flex-wrap: wrap;
@@ -178,19 +159,17 @@ a.desc:after {
     top:0;
     right:0;
     font-size:20px;
+    line-height:30px;
     border:none;
-    background:transparent;
+    background:red;
     padding:0;
     width:30px;
     height:30px;
     border-radius:50%;
-}
-.apple-menu-close:hover {
-    background:red;
     color:white;
 }
-.apple:hover .apple-menu-container{
-    display:flex;
+.apple-menu-close:hover {
+    background:darkred;
 }
 #alert{
     display:none;

@@ -21,7 +21,7 @@ class m251226_162314_create_apples_table extends Migration
             'color' => $this->string(20)->notNull()->defaultValue(Apple::COLORS[0])->comment('Цвет'),
             'status' => $this->integer(1)->notNull()->defaultValue(Apple::STATUS_TREE)->comment('Статус'),
             'fall_at' => $this->integer()->comment('Упало'),
-            'remain' => $this->integer(3)->unsigned()->notNull()->defaultValue(100)->comment('Осталось, %'),
+            'remain' => $this->integer(3)->unsigned()->notNull()->defaultValue(100)->comment('Осталось, %')
         ]);
     }
 

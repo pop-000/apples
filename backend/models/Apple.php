@@ -77,10 +77,10 @@ class Apple extends \yii\db\ActiveRecord
             ['color', 'default', 'value' => self::COLORS[0]],
             ['status', 'default', 'value' => self::STATUS_TREE],
             ['remain', 'default', 'value' => 100],
-            [['created_at', 'age', 'size', 'color', 'status', 'remain'], 'required'],
+            [['created_at', 'age', 'size', 'color', 'status', 'remain', 'fall_at'], 'required'],
             [['created_at', 'fall_at'], 'integer'],
             [['status'], 'in', 'range' => array_keys(self::STATUSES)],
-            [['remain'], 'in', 'range' => range(1, 100)],
+            [['remain'], 'in', 'range' => range(0, 100)],
             [['size'], 'in', 'range' => range(1, 6)],
         ];
     }
@@ -113,8 +113,29 @@ class Apple extends \yii\db\ActiveRecord
             for ($i = $count; $i--; $i > 0) {
                 self::create();
             }
+            // если на земле нет съедобных яблок, перезапускаем
+            $isEatableExists = self::find()
+                ->where(['status' => self::STATUS_GROUND])
+                ->exists();
+            if (!$isEatableExists) {
+                self::truncate();
+                self::fillTree();
+            }
         }
     }
+
+    /**
+     * Определяет изменения у яблок на переданный момент времени.
+     * @param int $now
+     * @return void
+     */
+    public static function checkOnTime($now) {
+        $apples = self::find()->all();
+        foreach ($apples as $apple) {
+            $apple->setAge($now);
+            $apple->save();
+        }
+    }     
 
     /**
      * Создает яблоко
@@ -125,6 +146,7 @@ class Apple extends \yii\db\ActiveRecord
         $model = new self;
         $dateFrom = time() - self::DAYS_BEFORE * 60 * 60 * 24;
         $model->created_at = rand($dateFrom, time() - 5);
+        $model->fall_at = $model->created_at + (self::DAYS_READY * 60 * 60 * 24);
         $model->setAge(time());
         $model->remain = 100; 
         if ($model->save()) {
@@ -144,14 +166,10 @@ class Apple extends \yii\db\ActiveRecord
         }
         $this->age = ceil(($now - $this->created_at) / (60 * 60 * 24));
         $this->size = $this->age > 6 ? 6 : $this->age;
-        if ($this->age > self::DAYS_READY) {
-            $this->fall_at = $this->created_at + (self::DAYS_READY * 60 * 60 * 24);
+        
+        if ($this->fall_at < $now) {
             $isBad = $this->getOnGroundHours($now) > self::HOURS_EATABLE;
-            if ($isBad) {
-                $this->status = self::STATUS_BAD;
-            } else {
-                $this->status = self::STATUS_GROUND;
-            }
+            $this->status = $isBad ? self::STATUS_BAD : self::STATUS_GROUND;
         } else {
             $this->status = self::STATUS_TREE;
         }
@@ -163,7 +181,7 @@ class Apple extends \yii\db\ActiveRecord
     }
 
     /**
-     * Сколько часов яблоко на земле. Устанавливает значение поля и возвращает значение.
+     * Сколько часов яблоко на земле. Устанавливает значение поля onGroundHours и возвращает значение.
      * @return int
      */
     public function getOnGroundHours($now) {
@@ -180,10 +198,6 @@ class Apple extends \yii\db\ActiveRecord
      */
     public function eat($eaten = 20) {
         $this->remain -= $eaten;
-        if ($this->remain < 1) {
-            $this->setDeleted();
-            return null;
-        }
         $this->save();
         return $this->remain;
     }
@@ -194,5 +208,13 @@ class Apple extends \yii\db\ActiveRecord
      */
     public static function isTreeEmpty() {
         return self::find()->exists() === false;
+    }
+
+    /**
+     * Очищает таблицу.
+     * @return void
+     */
+    public static function truncate() {
+        Yii::$app->db->createCommand()->truncateTable(self::tableName())->execute();
     }
 }

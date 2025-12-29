@@ -12,7 +12,7 @@ use yii\helpers\Html;
  * @var int $day
  */
 
-$this->title = 'Apples';
+$this->title = 'Яблочки';
 ?>
 <div class="apple-index">
     
