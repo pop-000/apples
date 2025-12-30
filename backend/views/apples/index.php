@@ -1,12 +1,13 @@
 <?php
 
-use common\models\Apple;
+use backend\models\Apple;
 use yii\helpers\Html;
 
 /** 
  * @var yii\web\View $this 
  * @var Apple[] $onTree
  * @var Apple[] $onGround
+ * @var int $start
  * @var int $now
  * @var int $hour
  * @var int $day
@@ -20,13 +21,15 @@ $this->title = 'Яблочки';
     
     <h1><?= Html::encode($this->title) ?></h1>
     <div class="menu-container">
-        <div class="menu">
-            <div><?= Html::a('Сначала', ['reload'], ['class' => 'btn btn-primary']); ?></div>
-            <div style="font-size:1.2em; font-weight:bold"><?= $day ?> день</div>
-            <div style="font-size:1.2em; font-weight:bold"><?= $hour ?> час</div>
-            <div><?= Html::a('+ час', ['next-time'], ['class' => 'btn btn-primary']); ?></div>
-            <div><?= Html::a('+ день', ['next-day'], ['class' => 'btn btn-primary']); ?></div>
-        </div>
+        <ul class="menu">
+            <li><?= Html::a('Сначала', ['reload'], ['class' => 'btn btn-primary']); ?></li>
+            <li>Старт: <?= date("H:i d.m.Y", $start) ?></li>
+            <li>На календаре <?= date("H:i d.m.Y", $now) ?></li>
+            <li style="font-size:1.2em; font-weight:bold"><?= $day ?> день</li>
+            <li style="font-size:1.2em; font-weight:bold"><?= $hour ?> час</li>
+            <li><?= Html::a('+ ' . Apple::HOURS_INCREMENT . ' час', ['next-time'], ['class' => 'btn btn-primary time-button', 'data-action' => 'next-time']); ?></li>
+            <li><?= Html::a('+ день', ['next-day'], ['class' => 'btn btn-primary time-button', 'data-action' => 'next-day']); ?></li>
+        </ul>
     </div>
     <div id="workarea">
         <div id="tree">

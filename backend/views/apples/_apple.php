@@ -15,6 +15,7 @@ $size = Apple::APPLE_START_SIZE + $model->size * Apple::APPLE_SIZE_INCREMENT;
     <?php
     echo Html::beginTag("div", [
         'class' => 'apple',
+        'id' => 'apple-' . $model->id,
         'style' => [
             'width' => $size . 'px',
             'height' => $size . 'px',

@@ -6,6 +6,7 @@ use Yii;
 use backend\models\Apple;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\helpers\Json;
 
 /**
  * ApplesController implements the CRUD actions for Apple model.
@@ -14,19 +15,33 @@ class ApplesController extends Controller {
 
     /**
      * Lists all Apple models.
-     *
      * @return string
      */
     public function actionIndex()
     {
         $session = Yii::$app->session;
+        if (!$session->isActive) {
+            $session->open();
+        }
+
         $start = $session->get("start") ?? time();
-        $now = $session->get("now") ?? $start;
         $session->set("start", $start);
+
+        $now = $session->get("now") ?? $start;
+        
+        if ($this->request->isAjax) {
+            $action = Yii::$app->request->post('action');
+            if ($action === 'next-time') {
+                $now += Apple::HOURS_INCREMENT * 60 * 60;
+            } elseif ($action === 'next-day') {
+                $now = strtotime('+' . Apple::DAY_INCREMENT . ' days', $now);
+            }
+        }
         $session->set("now", $now);
+
         $diff = $now - $start;
-        $day = floor($diff / 60 * 60 * 24);
-        $hour = floor($diff / 60 * 60);
+        $day = floor($diff / (60 * 60 * 24));
+        $hour = floor($diff / (60 * 60));
 
         if (Apple::isTreeEmpty()) {
             Apple::fillTree();
@@ -42,13 +57,20 @@ class ApplesController extends Controller {
             ->where(['status' => [Apple::STATUS_GROUND, Apple::STATUS_BAD]])
             ->all();
 
-        return $this->render('index', [
+        $params = [
             'onTree' => $onTree,
             'onGround' => $onGround,
+            'start' => $start,
             'now' => $now,
             'hour' => $hour,
             'day' => $day,
-        ]);
+        ];            
+
+        if ($this->request->isAjax) {
+            return JSON::encode($params);
+        }
+
+        return $this->render('index', $params);
     }
 
     /**
@@ -56,6 +78,8 @@ class ApplesController extends Controller {
      */
     public function actionReload(){
         Apple::truncate();
+        $session = Yii::$app->session;
+        $session->destroy();
         return $this->redirect(['index']);
     }
 
@@ -116,7 +140,7 @@ class ApplesController extends Controller {
      * Следующий временной шаг.
      * @return Response
      */
-    public function nextTime() {
+    public function actionNextTime() {
         $session = Yii::$app->session;
         $now = $session->get('now') ?? time(); 
         $next = $now + Apple::HOURS_INCREMENT * 60 * 60;
@@ -128,7 +152,7 @@ class ApplesController extends Controller {
      * Следующий день.
      * @return Response
      */
-    public function nextDay() {
+    public function actionNextDay() {
         $session = Yii::$app->session;
         $now = $session->get('now') ?? time(); 
         $tomorrow = strtotime('+' . Apple::DAY_INCREMENT . ' days', $now);

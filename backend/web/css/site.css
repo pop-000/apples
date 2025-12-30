@@ -201,7 +201,8 @@ a.desc:after {
     border:5px solid palegreen;
     border-radius: 8px;
     padding:1em;
+    list-style-type:none;
 }
-.menu div:not(:last-of-type) {
+.menu li:not(:last-of-type) {
     margin-bottom: 0.5em;
 }

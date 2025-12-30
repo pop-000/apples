@@ -1,3 +1,11 @@
+function showAlert(msg) {
+    $('#alert').text(msg)
+    $('#alert').slideDown("slow")
+    setTimeout(function(){
+        $('#alert').slideUp()
+    }, 3000)
+}
+
 $('body').on('click', ".apple-menu-close", function(e){
     let me = $(e.target)
     let container = me.closest(".apple-menu-container")
@@ -40,10 +48,31 @@ $('body').on('click', ".eat", function(e){
         showAlert(msg)
     }
 })
-function showAlert(msg) {
-    $('#alert').text(msg)
-    $('#alert').slideDown("slow")
-    setTimeout(function(){
-        $('#alert').slideUp()
-    }, 3000)
-}
+
+// $('body').on('click', '.time-button', function(e){
+//     e.preventDefault()
+//     let btn = $(e.target)
+//     $.ajax({
+//         method: "POST",
+//         url: '/apples/index',
+//         data: {
+//             'action': btn.data('action'),
+//         },
+//         success: function(response) {
+//             console.log(response)
+//         }
+//     })
+//     return false
+// })
+
+// function updateTree(data) {
+//     each(data, function(idx, el) {
+//         let apple = $("#apple-" + el.id)
+//         apple.data({
+//             'age': el.age,
+//             'size': el.size,
+//             'status': el.status,
+//             ''
+//         })
+//     })
+// }
