@@ -48,31 +48,3 @@ $('body').on('click', ".eat", function(e){
         showAlert(msg)
     }
 })
-
-// $('body').on('click', '.time-button', function(e){
-//     e.preventDefault()
-//     let btn = $(e.target)
-//     $.ajax({
-//         method: "POST",
-//         url: '/apples/index',
-//         data: {
-//             'action': btn.data('action'),
-//         },
-//         success: function(response) {
-//             console.log(response)
-//         }
-//     })
-//     return false
-// })
-
-// function updateTree(data) {
-//     each(data, function(idx, el) {
-//         let apple = $("#apple-" + el.id)
-//         apple.data({
-//             'age': el.age,
-//             'size': el.size,
-//             'status': el.status,
-//             ''
-//         })
-//     })
-// }

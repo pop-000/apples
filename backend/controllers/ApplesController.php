@@ -28,15 +28,6 @@ class ApplesController extends Controller {
         $session->set("start", $start);
 
         $now = $session->get("now") ?? $start;
-        
-        if ($this->request->isAjax) {
-            $action = Yii::$app->request->post('action');
-            if ($action === 'next-time') {
-                $now += Apple::HOURS_INCREMENT * 60 * 60;
-            } elseif ($action === 'next-day') {
-                $now = strtotime('+' . Apple::DAY_INCREMENT . ' days', $now);
-            }
-        }
         $session->set("now", $now);
 
         $diff = $now - $start;
