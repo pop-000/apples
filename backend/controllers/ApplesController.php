@@ -48,20 +48,14 @@ class ApplesController extends Controller {
             ->where(['status' => [Apple::STATUS_GROUND, Apple::STATUS_BAD]])
             ->all();
 
-        $params = [
+        return $this->render('index', [
             'onTree' => $onTree,
             'onGround' => $onGround,
             'start' => $start,
             'now' => $now,
             'hour' => $hour,
             'day' => $day,
-        ];            
-
-        if ($this->request->isAjax) {
-            return JSON::encode($params);
-        }
-
-        return $this->render('index', $params);
+        ]);
     }
 
     /**
