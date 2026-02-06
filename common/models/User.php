@@ -210,4 +210,23 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->password_reset_token = null;
     }
+
+    /**
+     * Создает тестового пользователя, если нет пользователей.
+     * @return null|User
+     */
+    public static function createTestUser() {
+        if (User::find()->count() > 0) {
+            return null;
+        }
+        $model = new User();
+        $model->username = 'test';
+        $model->setPassword('test');
+        $model->email = 'test@test.lo';
+        $model->generateAuthKey();
+        $model->status = User::STATUS_ACTIVE;
+        $model->created_at = time();
+        $model->save();
+        return $model;
+    }
 }

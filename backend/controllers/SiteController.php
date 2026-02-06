@@ -86,7 +86,7 @@ class SiteController extends Controller
 
         $model->password = '';
 
-        $this->_createTestUser();
+        User::createTestUser();
 
         return $this->render('login', [
             'model' => $model,
@@ -105,22 +105,4 @@ class SiteController extends Controller
         return $this->goHome();
     }
 
-    /**
-     * Создает тестового пользователя
-     * @return void
-     */
-    private function _createTestUser() {
-        if (User::find()->count() > 0) {
-            return;
-        }
-        $model = new User();
-        $model->username = 'test';
-        $model->setPassword('test');
-        $model->email = 'test@test.lo';
-        $model->generateAuthKey();
-        $model->status = User::STATUS_ACTIVE;
-        $model->created_at = time();
-        $model->save();
-        return $model;
-    }
 }
