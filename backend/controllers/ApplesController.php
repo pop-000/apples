@@ -30,10 +30,6 @@ class ApplesController extends Controller {
         $now = $session->get("now") ?? $start;
         $session->set("now", $now);
 
-        $diff = $now - $start;
-        $day = floor($diff / (60 * 60 * 24));
-        $hour = floor($diff / (60 * 60));
-
         if (Apple::isTreeEmpty()) {
             Apple::fillTree();
         } else {
@@ -53,8 +49,6 @@ class ApplesController extends Controller {
             'onGround' => $onGround,
             'start' => $start,
             'now' => $now,
-            'hour' => $hour,
-            'day' => $day,
         ]);
     }
 

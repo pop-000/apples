@@ -9,9 +9,11 @@ use yii\helpers\Html;
  * @var Apple[] $onGround
  * @var int $start
  * @var int $now
- * @var int $hour
- * @var int $day
  */
+
+$diff = $now - $start;
+$day = floor($diff / (60 * 60 * 24));
+$hour = floor($diff / (60 * 60));
 
 $this->title = 'Яблочки';
 ?>
